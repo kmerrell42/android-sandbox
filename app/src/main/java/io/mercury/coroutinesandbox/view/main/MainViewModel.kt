@@ -5,13 +5,21 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import io.mercury.coroutinesandbox.usecases.GetTimeSlowly
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(private val getTimeSlowly: GetTimeSlowly) : ViewModel() {
     val time: MutableLiveData<Long> by lazy {
         MutableLiveData<Long>().also {
-            it.value = getTimeSlowly.invoke()
+            viewModelScope.launch {
+                it.value = withContext(Dispatchers.IO) {
+                    getTimeSlowly.invoke()
+                }
+            }
         }
     }
 
