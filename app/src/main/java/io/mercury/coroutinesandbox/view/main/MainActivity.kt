@@ -8,6 +8,7 @@ import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.R.string
 import io.mercury.coroutinesandbox.databinding.ActivityMainBinding
 import io.mercury.coroutinesandbox.usecases.GetTimeSlowly
+import io.mercury.coroutinesandbox.view.lifecycle.LifecycleObserverFunctional
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Load
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
@@ -34,11 +35,24 @@ class MainActivity : AppCompatActivity() {
 
         val model by viewModels<MainViewModel> { MainViewModelFactory(this, savedInstanceState, getTimeSlowly)  }
 
-        // Bind this activity to the feature to consume states
-        model.feature.bind(::accept)
+        // Might borrow the Binder/Lifecycle concept from MVICore to reduce boilerplate
+        lifecycle.addObserver(LifecycleObserverFunctional(
+            onCreate = {
+                // Bind this activity to the feature to consume states
+                model.feature.bind(::accept)
 
-        // Bind the feature to consume actions
-        actionConsumers.add(model.feature::accept)
+                // Bind the feature to consume actions
+                actionConsumers.add(model.feature::accept)
+            },
+            onDestroy = {
+                // Bind this activity to the feature to consume states
+                model.feature.unbind(::accept)
+
+                // Bind the feature to consume actions
+                actionConsumers.remove(model.feature::accept)
+            }
+        ))
+
     }
 
     private fun accept(state: State) {

@@ -17,10 +17,15 @@ class MainFeature(
 ) {
     private val consumers = ArrayList<(State) -> Unit>()
     private var state: State = Unloaded
+        set(value) { consumers.forEach { it(value) } }
 
     fun bind(consumer: (State) -> Unit) {
         consumers.add(consumer)
         consumer(state) // Immediately tell the consumer what the existing state is
+    }
+
+    fun unbind(consumer: (State) -> Unit) {
+        consumers.remove(consumer)
     }
 
     fun accept(action: Action) {
