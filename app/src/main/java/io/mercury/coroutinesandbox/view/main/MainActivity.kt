@@ -7,23 +7,26 @@ import androidx.appcompat.app.AppCompatActivity
 import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.R.string
 import io.mercury.coroutinesandbox.databinding.ActivityMainBinding
-import io.mercury.coroutinesandbox.usecases.GetTimeSlowly
+import io.mercury.coroutinesandbox.usecases.DownloadUpdate
 import io.mercury.coroutinesandbox.view.lifecycle.LifecycleObserverFunctional
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
-import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Load
+import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
+import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
 import io.mercury.coroutinesandbox.view.main.MainFeature.State
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Loading
+import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
+import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    // This might be unneeded abstraction, especially while it is tied to MainFeature.Action
     private val actionConsumers = ArrayList<(Action) -> Unit>()
 
     // Dependencies
-    private val getTimeSlowly = GetTimeSlowly()
+    private val downloadUpdate = DownloadUpdate()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        val model by viewModels<MainViewModel> { MainViewModelFactory(this, savedInstanceState, getTimeSlowly)  }
+        val model by viewModels<MainViewModel> { MainViewModelFactory(this, savedInstanceState, downloadUpdate)  }
 
         // Might borrow the Binder/Lifecycle concept from MVICore to reduce boilerplate
         lifecycle.addObserver(LifecycleObserverFunctional(
@@ -52,33 +55,37 @@ class MainActivity : AppCompatActivity() {
                 actionConsumers.remove(model.feature::accept)
             }
         ))
-
     }
 
+    // Functional: Should we bind functions by state to get the when clause out of our face?
+    // Maybe the single accept(...) helps drive the single state idea?
     private fun accept(state: State) {
         when(state) {
             is Unloaded -> {
                 binding.loadBtn.apply {
-                    isEnabled = true
-                    text = getString(string.load)
-                    setOnClickListener { actionConsumers.forEach { it.invoke(Load) }}
+                    text = getString(string.download_update)
+                    setOnClickListener { actionConsumers.forEach { it.invoke(Download) }}
                 }
 
                 binding.content.visibility = View.GONE
-                binding.loading.visibility = View.GONE
+                binding.loading.apply {
+                    visibility = View.GONE
+                    text = getString(string.update_available)
+                }
             }
-            is Loading -> {
+            is Downloading -> {
                 binding.loadBtn.apply {
-                    isEnabled = false
-                    text = getString(string.loading)
-                    setOnClickListener(null)
+                    text = getString(string.cancel)
+                    setOnClickListener { actionConsumers.forEach { it.invoke(Cancel) }}
                 }
                 binding.content.visibility = View.GONE
-                binding.loading.visibility = View.VISIBLE
+                binding.loading.apply {
+                    visibility = View.VISIBLE
+                    text = getString(string.download_percent_format, state.percentCompete)
+                }
             }
-            is Loaded -> {
+            is Downloaded -> {
                 binding.loadBtn.apply {
-                    isEnabled = true
                     text = getString(string.unload)
                     setOnClickListener { actionConsumers.forEach { it.invoke(Unload) }}
                 }
@@ -87,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
                 binding.content.apply {
                     visibility = View.VISIBLE
-                    text = state.time.toString()
+                    text = getString(string.download_complete)
                 }
             }
         }

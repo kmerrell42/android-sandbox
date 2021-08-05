@@ -1,23 +1,29 @@
 package io.mercury.coroutinesandbox.view.main
 
-import io.mercury.coroutinesandbox.usecases.GetTimeSlowly
+import io.mercury.coroutinesandbox.usecases.DownloadUpdate
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
-import io.mercury.coroutinesandbox.view.main.MainFeature.Event.Load
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Loading
+import io.mercury.coroutinesandbox.view.main.MainFeature.Event.Download
+import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
+import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainFeature(
-    private val getTimeSlowly: GetTimeSlowly,
+    private val downloadUpdate: DownloadUpdate,
     private val scope: CoroutineScope
 ) {
+    private var downloadJob: Job? = null
     private val consumers = ArrayList<(State) -> Unit>()
     private var state: State = Unloaded
-        set(value) { consumers.forEach { it(value) } }
+        set(value) {
+            field = value
+            consumers.forEach { it(value) }
+        }
 
     fun bind(consumer: (State) -> Unit) {
         consumers.add(consumer)
@@ -30,37 +36,53 @@ class MainFeature(
 
     fun accept(action: Action) {
         when (action) {
-            is Action.Load -> processLoadAction()
-            is Unload -> processUnloadAction()
+            is Action.Download -> handleDownloadAction()
+            is Action.Cancel -> handleCancelAction()
+            is Unload -> handleUnloadAction()
         }
     }
 
-    private fun processUnloadAction() {
-        if (state is Loaded) {
+    private fun handleCancelAction() {
+        if (state is Downloading) {
+            process(Event.Cancel)
+        }
+    }
+
+    private fun handleUnloadAction() {
+        if (state is Downloaded) {
             process(Event.Unload)
         }
     }
 
-    private fun processLoadAction() {
-        if (state !is Loaded && state !is Loading) {
-            process(Load)
+    private fun handleDownloadAction() {
+        if (state !is Downloaded && state !is Downloading) {
+            process(Download)
         }
     }
 
     private fun process(event: Event) {
-        scope.launch {
-            when (event) {
-                is Load -> {
-                    updateState(Loading)
-
+        when (event) {
+            is Download -> {
+                downloadJob?.cancel()
+                downloadJob = scope.launch {
                     withContext(Dispatchers.IO) {
-                        getTimeSlowly.invoke()
-                    }.let { time ->
-                        updateState(Loaded(time))
+                        downloadUpdate.invoke()
+                    }.let { downloadUpdateFlow ->
+                        downloadUpdateFlow.collect { percentDownladed ->
+                            if (percentDownladed < 100) {
+                                updateState(Downloading(percentDownladed))
+                            } else {
+                                updateState(Downloaded)
+                            }
+                        }
                     }
                 }
-                Event.Unload -> updateState(Unloaded)
             }
+            is Event.Cancel -> {
+                downloadJob?.cancel()
+                updateState(Unloaded)
+            }
+            is Event.Unload -> updateState(Unloaded)
         }
     }
 
@@ -71,17 +93,19 @@ class MainFeature(
 
     sealed class State {
         object Unloaded : State()
-        object Loading : State()
-        data class Loaded(val time: Long) : State()
+        data class Downloading(val percentCompete: Int) : State()
+        object Downloaded : State()
     }
 
     sealed class Action {
-        object Load : Action()
+        object Download : Action()
+        object Cancel : Action()
         object Unload : Action()
     }
 
     private sealed class Event {
-        object Load : Event()
+        object Download : Event()
         object Unload : Event()
+        object Cancel : Event()
     }
 }
