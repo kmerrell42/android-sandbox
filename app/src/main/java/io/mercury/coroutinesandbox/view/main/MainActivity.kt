@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.R.string
 import io.mercury.coroutinesandbox.databinding.ActivityMainBinding
@@ -18,6 +19,7 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -25,17 +27,14 @@ class MainActivity : AppCompatActivity() {
     // This might be unneeded abstraction, especially while it is tied to MainFeature.Action
     private val actionConsumers = ArrayList<(Action) -> Unit>()
 
-    // Dependencies
-    private val downloadUpdate = DownloadUpdate()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
-        val model by viewModels<MainViewModel> { MainViewModelFactory(this, savedInstanceState, downloadUpdate)  }
+        val model: MainViewModel by viewModels()
 
         // Might borrow the Binder/Lifecycle concept from MVICore to reduce boilerplate
         lifecycle.addObserver(LifecycleObserverFunctional(

@@ -5,8 +5,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
+import javax.inject.Inject
 
-class DownloadUpdate {
+class DownloadUpdate @Inject constructor() {
     suspend fun invoke(): Flow<Int> {
         return flow {
             var i = 0
