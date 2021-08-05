@@ -3,6 +3,7 @@ package io.mercury.coroutinesandbox.view.main
 import io.mercury.coroutinesandbox.usecases.DownloadUpdate
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
 import io.mercury.coroutinesandbox.view.main.MainFeature.Event.Download
+import io.mercury.coroutinesandbox.view.main.MainFeature.NewsEvent.Percent50
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
@@ -18,20 +19,33 @@ class MainFeature(
     private val scope: CoroutineScope
 ) {
     private var downloadJob: Job? = null
-    private val consumers = ArrayList<(State) -> Unit>()
+
+    private val stateConsumers = ArrayList<(State) -> Unit>()
+    private val newsConsumers = ArrayList<(NewsEvent) -> Unit>()
+
     private var state: State = Unloaded
         set(value) {
             field = value
-            consumers.forEach { it(value) }
+            stateConsumers.forEach { it(value) }
         }
 
     fun bind(consumer: (State) -> Unit) {
-        consumers.add(consumer)
+        stateConsumers.add(consumer)
         consumer(state) // Immediately tell the consumer what the existing state is
     }
 
     fun unbind(consumer: (State) -> Unit) {
-        consumers.remove(consumer)
+        stateConsumers.remove(consumer)
+    }
+
+    @JvmName("bindNews")
+    fun bind(consumer: (NewsEvent) -> Unit) {
+        newsConsumers.add(consumer)
+    }
+
+    @JvmName("unbindNews")
+    fun unbind(consumer: (NewsEvent) -> Unit) {
+        newsConsumers.remove(consumer)
     }
 
     fun accept(action: Action) {
@@ -69,6 +83,9 @@ class MainFeature(
                         downloadUpdate.invoke()
                     }.let { downloadUpdateFlow ->
                         downloadUpdateFlow.collect { percentDownladed ->
+                            if (percentDownladed == 50) {
+                                publishNewsEvent(Percent50)
+                            }
                             if (percentDownladed < 100) {
                                 updateState(Downloading(percentDownladed))
                             } else {
@@ -86,9 +103,13 @@ class MainFeature(
         }
     }
 
+    private fun publishNewsEvent(newsEvent: NewsEvent) {
+        newsConsumers.forEach { it(newsEvent) }
+    }
+
     private fun updateState(newState: State) {
         state = newState
-        consumers.forEach { it(newState) }
+        stateConsumers.forEach { it(newState) }
     }
 
     sealed class State {
@@ -107,5 +128,9 @@ class MainFeature(
         object Download : Event()
         object Unload : Event()
         object Cancel : Event()
+    }
+
+    sealed class NewsEvent {
+        object Percent50 : NewsEvent()
     }
 }

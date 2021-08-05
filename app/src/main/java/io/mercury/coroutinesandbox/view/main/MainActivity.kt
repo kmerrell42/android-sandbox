@@ -2,18 +2,19 @@ package io.mercury.coroutinesandbox.view.main
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
-import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.R.string
 import io.mercury.coroutinesandbox.databinding.ActivityMainBinding
-import io.mercury.coroutinesandbox.usecases.DownloadUpdate
 import io.mercury.coroutinesandbox.view.lifecycle.LifecycleObserverFunctional
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
+import io.mercury.coroutinesandbox.view.main.MainFeature.NewsEvent
+import io.mercury.coroutinesandbox.view.main.MainFeature.NewsEvent.Percent50
 import io.mercury.coroutinesandbox.view.main.MainFeature.State
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
@@ -40,14 +41,16 @@ class MainActivity : AppCompatActivity() {
         lifecycle.addObserver(LifecycleObserverFunctional(
             onCreate = {
                 // Bind this activity to the feature to consume states
-                model.feature.bind(::accept)
+                model.feature.bind(::onNewState)
+                model.feature.bind(::onNewsBroadcast)
 
                 // Bind the feature to consume actions
                 actionConsumers.add(model.feature::accept)
             },
             onDestroy = {
                 // Bind this activity to the feature to consume states
-                model.feature.unbind(::accept)
+                model.feature.unbind(::onNewState)
+                model.feature.unbind(::onNewsBroadcast)
 
                 // Bind the feature to consume actions
                 actionConsumers.remove(model.feature::accept)
@@ -57,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
     // Functional: Should we bind functions by state to get the when clause out of our face?
     // Maybe the single accept(...) helps drive the single state idea?
-    private fun accept(state: State) {
+    private fun onNewState(state: State) {
         when(state) {
             is Unloaded -> {
                 binding.loadBtn.apply {
@@ -94,6 +97,14 @@ class MainActivity : AppCompatActivity() {
                     visibility = View.VISIBLE
                     text = getString(string.download_complete)
                 }
+            }
+        }
+    }
+
+    fun onNewsBroadcast(newsEvent: NewsEvent) {
+        when (newsEvent) {
+            is Percent50 -> {
+                Toast.makeText(this, getString(string.half_way_there), Toast.LENGTH_SHORT).show()
             }
         }
     }
