@@ -21,7 +21,10 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -96,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun publishAction(action: Action) {
-        runBlocking {
+        lifecycleScope.launch {
             actionPublisher.emit(action)
         }
     }

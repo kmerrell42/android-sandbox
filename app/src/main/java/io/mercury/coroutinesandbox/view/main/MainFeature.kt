@@ -79,22 +79,18 @@ class MainFeature(
             }
             is Event.Cancel -> {
                 downloadJob?.cancel()
-                updateState(Unloaded)
+                scope.launch { updateState(Unloaded) }
             }
-            is Event.Unload -> updateState(Unloaded)
+            is Event.Unload -> scope.launch { updateState(Unloaded) }
         }
     }
 
-    private fun publishNewsEvent(newsEvent: NewsEvent) {
-        scope.launch {
-            newsPublisher.send(newsEvent)
-        }
+    private suspend fun publishNewsEvent(newsEvent: NewsEvent) {
+        newsPublisher.send(newsEvent)
     }
 
-    private fun updateState(newState: State) {
-        scope.launch {
-            statePublisher.emit(newState)
-        }
+    private suspend fun updateState(newState: State) {
+        statePublisher.emit(newState)
     }
 
     sealed class State {
