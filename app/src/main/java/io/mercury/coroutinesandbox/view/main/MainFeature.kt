@@ -10,11 +10,11 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -27,8 +27,8 @@ class MainFeature(
     private val statePublisher = MutableStateFlow<State>(Unloaded)
     val state get() = statePublisher.asStateFlow()
 
-    private val newsPublisher = Channel<NewsEvent>()
-    val newsEvent = newsPublisher.receiveAsFlow()
+    private val newsPublisher = MutableSharedFlow<NewsEvent>()
+    val newsEvent = newsPublisher.asSharedFlow()
 
     fun onAction(action: Action) {
         when (action) {
@@ -87,7 +87,7 @@ class MainFeature(
 
     private fun publishNewsEvent(newsEvent: NewsEvent) {
         scope.launch {
-            newsPublisher.send(newsEvent)
+            newsPublisher.emit(newsEvent)
         }
     }
 

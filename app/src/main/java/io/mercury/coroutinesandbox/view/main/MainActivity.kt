@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
 import io.mercury.coroutinesandbox.databinding.ActivityMainBinding
@@ -18,11 +19,8 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
@@ -30,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val actionPublisher = Channel<Action>()
+    private val actionPublisher = MutableSharedFlow<Action>(replay = 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,11 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         val model: MainViewModel by viewModels()
 
-        lifecycleScope.launchWhenCreated {
-            model.feature.state.collect(::onNewState)
-            model.feature.newsEvent.collect(::onNewsBroadcast)
-            actionPublisher.receiveAsFlow().collect(model.feature::onAction)
-        }
+        lifecycleScope.launchWhenCreated { actionPublisher.collect(model.feature::onAction) }
+        lifecycleScope.launchWhenCreated { model.feature.state.collect(::onNewState) }
+        lifecycleScope.launchWhenCreated { model.feature.newsEvent.collect(::onNewsBroadcast) }
     }
 
     // Functional: Should we bind functions by state to get the when clause out of our face?
@@ -101,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun publishAction(action: Action) {
         runBlocking {
-            launch { actionPublisher.send(action) }
+            actionPublisher.emit(action)
         }
     }
 }
