@@ -10,7 +10,11 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -20,35 +24,13 @@ class MainFeature(
 ) {
     private var downloadJob: Job? = null
 
-    private val stateConsumers = ArrayList<(State) -> Unit>()
-    private val newsConsumers = ArrayList<(NewsEvent) -> Unit>()
+    private val statePublisher = MutableStateFlow<State>(Unloaded)
+    val state get() = statePublisher.asStateFlow()
 
-    private var state: State = Unloaded
-        set(value) {
-            field = value
-            stateConsumers.forEach { it(value) }
-        }
+    private val newsPublisher = Channel<NewsEvent>()
+    val newsEvent = newsPublisher.receiveAsFlow()
 
-    fun bind(consumer: (State) -> Unit) {
-        stateConsumers.add(consumer)
-        consumer(state) // Immediately tell the consumer what the existing state is
-    }
-
-    fun unbind(consumer: (State) -> Unit) {
-        stateConsumers.remove(consumer)
-    }
-
-    @JvmName("bindNews")
-    fun bind(consumer: (NewsEvent) -> Unit) {
-        newsConsumers.add(consumer)
-    }
-
-    @JvmName("unbindNews")
-    fun unbind(consumer: (NewsEvent) -> Unit) {
-        newsConsumers.remove(consumer)
-    }
-
-    fun accept(action: Action) {
+    fun onAction(action: Action) {
         when (action) {
             is Action.Download -> handleDownloadAction()
             is Action.Cancel -> handleCancelAction()
@@ -57,19 +39,19 @@ class MainFeature(
     }
 
     private fun handleCancelAction() {
-        if (state is Downloading) {
+        if (state.value is Downloading) {
             process(Event.Cancel)
         }
     }
 
     private fun handleUnloadAction() {
-        if (state is Downloaded) {
+        if (state.value is Downloaded) {
             process(Event.Unload)
         }
     }
 
     private fun handleDownloadAction() {
-        if (state !is Downloaded && state !is Downloading) {
+        if (state.value !is Downloaded && statePublisher.value !is Downloading) {
             process(Download)
         }
     }
@@ -82,12 +64,12 @@ class MainFeature(
                     withContext(Dispatchers.IO) {
                         downloadUpdate.invoke()
                     }.let { downloadUpdateFlow ->
-                        downloadUpdateFlow.collect { percentDownladed ->
-                            if (percentDownladed == 50) {
+                        downloadUpdateFlow.collect { percentDownloaded ->
+                            if (percentDownloaded == 50) {
                                 publishNewsEvent(Percent50)
                             }
-                            if (percentDownladed < 100) {
-                                updateState(Downloading(percentDownladed))
+                            if (percentDownloaded < 100) {
+                                updateState(Downloading(percentDownloaded))
                             } else {
                                 updateState(Downloaded)
                             }
@@ -104,12 +86,15 @@ class MainFeature(
     }
 
     private fun publishNewsEvent(newsEvent: NewsEvent) {
-        newsConsumers.forEach { it(newsEvent) }
+        scope.launch {
+            newsPublisher.send(newsEvent)
+        }
     }
 
     private fun updateState(newState: State) {
-        state = newState
-        stateConsumers.forEach { it(newState) }
+        scope.launch {
+            statePublisher.emit(newState)
+        }
     }
 
     sealed class State {
