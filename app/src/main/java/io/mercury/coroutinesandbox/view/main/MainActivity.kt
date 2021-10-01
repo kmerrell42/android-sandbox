@@ -20,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.appcompattheme.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
+import io.mercury.coroutinesandbox.view.ThemedMaterial
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
@@ -70,11 +70,10 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainScreen(msg: String, btnLabel: String, btnAction: () -> Unit) {
-        AppCompatTheme {
+        ThemedMaterial {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = MaterialTheme.colors.background)
             ) {
                 Text(
                     text = msg,
