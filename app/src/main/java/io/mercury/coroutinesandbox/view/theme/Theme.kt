@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.view
+package io.mercury.coroutinesandbox.view.theme
 
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme

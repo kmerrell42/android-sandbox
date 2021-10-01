@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -22,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
-import io.mercury.coroutinesandbox.view.ThemedMaterial
+import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
