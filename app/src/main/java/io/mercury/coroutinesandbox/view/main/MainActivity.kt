@@ -13,6 +13,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +34,7 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -45,34 +48,10 @@ class MainActivity : ComponentActivity() {
 
         val model: MainViewModel by viewModels()
 
-        lifecycleScope.launchWhenCreated { actionPublisher.collect(model.feature::onAction) }
-        lifecycleScope.launchWhenCreated { model.feature.state.collect(::renderScreen) }
-        lifecycleScope.launchWhenCreated { model.feature.newsEvent.collect(::onNewsBroadcast) }
-    }
+        setContent { ReactiveScreen(model.feature.state) }
 
-    private fun renderScreen(state: State) {
-        setContent {
-            when (state) {
-                is Unloaded -> {
-                    MainScreen(msg = getString(string.update_available),
-                        btnLabel = getString(string.download_update),
-                        btnAction = { publishAction(Download) })
-                }
-                is Downloading -> {
-                    MainScreen(msg = getString(
-                        string.download_percent_format,
-                        state.percentCompete
-                    ),
-                        btnLabel = getString(string.cancel),
-                        btnAction = { publishAction(Cancel) })
-                }
-                is Downloaded -> {
-                    MainScreen(msg = getString(string.download_complete),
-                        btnLabel = getString(string.unload),
-                        btnAction = { publishAction(Unload) })
-                }
-            }
-        }
+        lifecycleScope.launchWhenCreated { actionPublisher.collect(model.feature::onAction) }
+        lifecycleScope.launchWhenCreated { model.feature.newsEvent.collect(::onNewsBroadcast) }
     }
 
     private fun onNewsBroadcast(newsEvent: NewsEvent) {
@@ -118,4 +97,38 @@ class MainActivity : ComponentActivity() {
     fun PreviewMainScreen() {
         MainScreen(msg = "Message", btnLabel = "Button Label") {}
     }
+
+    @Composable
+    fun ReactiveScreen(state: StateFlow<State>) {
+        val composeState by state.collectAsState(lifecycleScope.coroutineContext)
+
+        composeState.toRenderModel().let { renderModel ->
+            MainScreen(renderModel.msg, renderModel.btnLabel, renderModel.btnAction)
+        }
+    }
+
+    private fun State.toRenderModel() : RenderModel {
+        return when (this) {
+            is Unloaded -> {
+                RenderModel(msg = getString(string.update_available),
+                    btnLabel = getString(string.download_update),
+                    btnAction = { publishAction(Download) })
+            }
+            is Downloading -> {
+                RenderModel(msg = getString(
+                    string.download_percent_format,
+                    percentCompete
+                ),
+                    btnLabel = getString(string.cancel),
+                    btnAction = { publishAction(Cancel) })
+            }
+            is Downloaded -> {
+                RenderModel(msg = getString(string.download_complete),
+                    btnLabel = getString(string.unload),
+                    btnAction = { publishAction(Unload) })
+            }
+        }
+    }
+
+    private data class RenderModel(val msg: String, val btnLabel: String, val btnAction: () -> Unit)
 }
