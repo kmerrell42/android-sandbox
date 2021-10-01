@@ -20,10 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.appcompattheme.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
-import io.mercury.coroutinesandbox.view.compose.ComposeIfDebug
-import io.mercury.coroutinesandbox.view.compose.RecompositionIndicator
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
@@ -71,35 +70,22 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainScreen(msg: String, btnLabel: String, btnAction: () -> Unit) {
-        MaterialTheme {
+        AppCompatTheme {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = MaterialTheme.colors.background)
             ) {
-                ComposeIfDebug {
-                    RecompositionIndicator(
-                        state = msg, modifier = Modifier
-                            .align(Companion.Center)
-                            .offset(
-                                0.dp,
-                                (-20).dp
-                            )
-                    )
-                }
                 Text(
                     text = msg,
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier.align(Companion.Center)
                 )
 
-                Button(
-                    onClick = btnAction,
+                Button(onClick = btnAction,
                     modifier = Modifier
                         .align(Companion.BottomCenter)
-                        .offset(0.dp, (-24).dp)
-                ) {
-                    ComposeIfDebug { RecompositionIndicator(state = btnAction) }
+                        .offset(0.dp, (-24).dp)) {
                     Text(text = btnLabel)
                 }
             }
@@ -121,7 +107,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun State.toRenderModel(): RenderModel {
+    private fun State.toRenderModel() : RenderModel {
         return when (this) {
             is Unloaded -> {
                 RenderModel(msg = getString(string.update_available),
