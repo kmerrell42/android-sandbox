@@ -81,10 +81,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.align(Companion.Center)
                 )
 
-                Button(onClick = btnAction,
+                Button(
+                    onClick = btnAction,
                     modifier = Modifier
                         .align(Companion.BottomCenter)
-                        .offset(0.dp, (-24).dp)) {
+                        .offset(0.dp, (-24).dp)
+                ) {
                     Text(text = btnLabel)
                 }
             }
@@ -106,7 +108,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun State.toRenderModel() : RenderModel {
+    private fun State.toRenderModel(): RenderModel {
         return when (this) {
             is Unloaded -> {
                 RenderModel(msg = getString(string.update_available),
