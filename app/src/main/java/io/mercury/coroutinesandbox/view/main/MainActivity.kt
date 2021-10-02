@@ -40,7 +40,6 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -54,7 +53,10 @@ class MainActivity : ComponentActivity() {
 
         val model: MainViewModel by viewModels()
 
-        setContent { ReactiveScreen(model.feature.state) }
+        setContent {
+            val composeState by model.feature.state.collectAsState(lifecycleScope.coroutineContext)
+            MainScreen(composeState)
+        }
 
         lifecycleScope.launchWhenCreated { actionPublisher.collect(model.feature::onAction) }
         lifecycleScope.launchWhenCreated { model.feature.newsEvent.collect(::onNewsBroadcast) }
@@ -128,14 +130,7 @@ class MainActivity : ComponentActivity() {
     @Preview
     @Composable
     fun PreviewMainScreen() {
-        MainScreen(Downloading(35))
-    }
-
-    @Composable
-    fun ReactiveScreen(state: StateFlow<State>) {
-        val composeState by state.collectAsState(lifecycleScope.coroutineContext)
-
-        MainScreen(composeState)
+        MainScreen(Unloaded)
     }
 
     private fun State.toMessage(): String {
