@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Button
 import androidx.compose.material.LinearProgressIndicator
@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,43 +81,45 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colors.background)
+                    .padding(24.dp)
             ) {
 
-                // Message and possibly progress indication
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .align(Companion.Center)
-                        .height(60.dp)
-                        .wrapContentWidth()
-                ) {
-                    Text(
-                        text = state.toMessage(),
-                        style = MaterialTheme.typography.body1,
-                    )
-
-                    when (state) {
-                        is Downloading -> {
-                            val animatedProgress by animateFloatAsState(
-                                targetValue = state.percentCompete * .01f,
-                                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-                            )
-                            LinearProgressIndicator(progress = animatedProgress)
-                        }
-                        is Downloaded -> LinearProgressIndicator(progress = 1f)
-                        else -> {
-                            // Don't add the progress bar
-                        }
-                    }
-                }
+                UpdateStatus(state = state, modifier = Modifier.align(Alignment.Center))
 
                 Button(
                     onClick = state.toButtonAction(),
-                    modifier = Modifier
-                        .align(Companion.BottomCenter)
-                        .offset(0.dp, (-24).dp)
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     Text(text = state.toButtonLabel())
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun UpdateStatus(state: State, modifier: Modifier = Modifier) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier
+                .height(60.dp)
+                .wrapContentWidth()
+        ) {
+            Text(
+                text = state.toMessage(),
+                style = MaterialTheme.typography.body1,
+            )
+
+            when (state) {
+                is Downloading -> {
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = state.percentCompete * .01f,
+                        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+                    )
+                    LinearProgressIndicator(progress = animatedProgress)
+                }
+                is Downloaded -> LinearProgressIndicator(progress = 1f)
+                else -> {
+                    // Don't add the progress bar
                 }
             }
         }
