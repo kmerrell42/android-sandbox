@@ -5,15 +5,23 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Button
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
-import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
@@ -32,6 +39,7 @@ import io.mercury.coroutinesandbox.view.main.MainFeature.State
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
 import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
+import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -68,25 +76,49 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun MainScreen(msg: String, btnLabel: String, btnAction: () -> Unit) {
+    fun MainScreen(state: State) {
         ThemedMaterial {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colors.background)
             ) {
-                Text(
-                    text = msg,
-                    style = MaterialTheme.typography.body1,
-                    modifier = Modifier.align(Companion.Center)
-                )
+
+                // Message and possibly progress indication
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .align(Companion.Center)
+                        .height(60.dp)
+                        .wrapContentWidth()
+                ) {
+                    Text(
+                        text = state.toMessage(),
+                        style = MaterialTheme.typography.body1,
+                    )
+
+                    when (state) {
+                        is Downloading -> {
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = state.percentCompete * .01f,
+                                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+                            )
+                            LinearProgressIndicator(progress = animatedProgress)
+                        }
+                        is Downloaded -> LinearProgressIndicator(progress = 1f)
+                        else -> {
+                            // Don't add the progress bar
+                        }
+                    }
+                }
 
                 Button(
-                    onClick = btnAction,
+                    onClick = state.toButtonAction(),
                     modifier = Modifier
                         .align(Companion.BottomCenter)
                         .offset(0.dp, (-24).dp)
                 ) {
-                    Text(text = btnLabel)
+                    Text(text = state.toButtonLabel())
                 }
             }
         }
@@ -95,40 +127,43 @@ class MainActivity : ComponentActivity() {
     @Preview
     @Composable
     fun PreviewMainScreen() {
-        MainScreen(msg = "Message", btnLabel = "Button Label") {}
+        MainScreen(Downloading(35))
     }
 
     @Composable
     fun ReactiveScreen(state: StateFlow<State>) {
         val composeState by state.collectAsState(lifecycleScope.coroutineContext)
 
-        composeState.toRenderModel().let { renderModel ->
-            MainScreen(renderModel.msg, renderModel.btnLabel, renderModel.btnAction)
+        MainScreen(composeState)
+    }
+
+    private fun State.toMessage(): String {
+        return when (this) {
+            is Unloaded -> getString(string.update_available)
+            is Downloading -> getString(string.download_percent_format, percentCompete)
+            is Downloaded -> getString(string.download_complete)
         }
     }
 
-    private fun State.toRenderModel(): RenderModel {
+    private fun State.toButtonLabel(): String {
+        return when (this) {
+            is Unloaded -> getString(string.download_update)
+            is Downloading -> getString(string.cancel)
+            is Downloaded -> getString(string.unload)
+        }
+    }
+
+    private fun State.toButtonAction(): () -> Unit {
         return when (this) {
             is Unloaded -> {
-                RenderModel(msg = getString(string.update_available),
-                    btnLabel = getString(string.download_update),
-                    btnAction = { publishAction(Download) })
+                { publishAction(Download) }
             }
             is Downloading -> {
-                RenderModel(msg = getString(
-                    string.download_percent_format,
-                    percentCompete
-                ),
-                    btnLabel = getString(string.cancel),
-                    btnAction = { publishAction(Cancel) })
+                { publishAction(Cancel) }
             }
             is Downloaded -> {
-                RenderModel(msg = getString(string.download_complete),
-                    btnLabel = getString(string.unload),
-                    btnAction = { publishAction(Unload) })
+                { publishAction(Unload) }
             }
         }
     }
-
-    private data class RenderModel(val msg: String, val btnLabel: String, val btnAction: () -> Unit)
 }
