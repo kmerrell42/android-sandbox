@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R.string
+import io.mercury.coroutinesandbox.view.component.ClockFactory
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Download
@@ -44,9 +45,13 @@ import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var clockFactory: ClockFactory
 
     private val actionPublisher = MutableSharedFlow<Action>(replay = 0)
 
@@ -87,6 +92,8 @@ class MainActivity : ComponentActivity() {
                     .background(MaterialTheme.colors.background)
                     .padding(24.dp)
             ) {
+
+                clockFactory.Clock(lifecycleScope.coroutineContext)
 
                 UpdateStatus(state = state, modifier = Modifier.align(Alignment.Center))
 
@@ -133,8 +140,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                clockFactory.Clock(
+                    coroutineContext = lifecycleScope.coroutineContext,
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                )
             }
-
         }
     }
 
