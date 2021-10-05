@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import io.mercury.coroutinesandbox.usecases.GetTime
 import io.mercury.coroutinesandbox.view.DateTimeFormatter
 import javax.inject.Inject
@@ -23,12 +24,30 @@ class ClockFactory @Inject constructor(
     fun Clock(coroutineContext: CoroutineContext, modifier: Modifier = Modifier) {
         val state = getTime.invoke()
             .collectAsState(context = coroutineContext, initial = System.currentTimeMillis())
-
-        Box(modifier = modifier.background(MaterialTheme.colors.secondary)) {
-            Text(
-                text = dateTimeFormatter.formatClockTime(state.value),
-                color = MaterialTheme.colors.onSecondary
-            )
-        }
+        ClockInternal(
+            dateTimeFormatter = dateTimeFormatter,
+            modifier = modifier,
+            millis = state.value
+        )
     }
+}
+
+@Composable
+private fun ClockInternal(
+    dateTimeFormatter: DateTimeFormatter,
+    millis: Long,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.background(MaterialTheme.colors.secondary)) {
+        Text(
+            text = dateTimeFormatter.formatClockTime(millis),
+            color = MaterialTheme.colors.onSecondary
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewClock() {
+    ClockInternal(DateTimeFormatter(), System.currentTimeMillis())
 }
