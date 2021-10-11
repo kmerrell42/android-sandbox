@@ -22,7 +22,7 @@ class ClockFactory @Inject constructor(
 ) {
     @Composable
     fun Clock(coroutineContext: CoroutineContext, modifier: Modifier = Modifier) {
-        val state = getTime.invoke()
+        val state = getTime()
             .collectAsState(context = coroutineContext, initial = System.currentTimeMillis())
         ClockInternal(
             dateTimeFormatter = dateTimeFormatter,
