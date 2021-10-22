@@ -1,12 +1,13 @@
-package io.mercury.coroutinesandbox.view.main
+package io.mercury.coroutinesandbox.view.downloader
 
 import io.mercury.coroutinesandbox.usecases.DownloadUpdate
-import io.mercury.coroutinesandbox.view.main.MainFeature.Action.Unload
-import io.mercury.coroutinesandbox.view.main.MainFeature.Event.Download
-import io.mercury.coroutinesandbox.view.main.MainFeature.NewsEvent.Percent50
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloaded
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Downloading
-import io.mercury.coroutinesandbox.view.main.MainFeature.State.Unloaded
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Action.Cancel
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Action.Unload
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Event.Download
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.NewsEvent.Percent50
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.State.Downloaded
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.State.Downloading
+import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.State.Unloaded
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainFeature(
+class DownloaderFeature(
     private val downloadUpdate: DownloadUpdate,
     private val scope: CoroutineScope
 ) {
@@ -33,7 +34,7 @@ class MainFeature(
     fun onAction(action: Action) {
         when (action) {
             is Action.Download -> handleDownloadAction()
-            is Action.Cancel -> handleCancelAction()
+            is Cancel -> handleCancelAction()
             is Unload -> handleUnloadAction()
         }
     }

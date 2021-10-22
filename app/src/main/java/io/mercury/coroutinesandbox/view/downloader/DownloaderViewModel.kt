@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.view.main
+package io.mercury.coroutinesandbox.view.downloader
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,8 +7,7 @@ import io.mercury.coroutinesandbox.usecases.DownloadUpdate
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(downloadUpdate: DownloadUpdate) : ViewModel() {
+class DownloaderViewModel @Inject constructor(downloadUpdate: DownloadUpdate) : ViewModel() {
 
-    val feature = MainFeature(downloadUpdate, viewModelScope)
-
+    val feature = DownloaderFeature(downloadUpdate, viewModelScope)
 }
