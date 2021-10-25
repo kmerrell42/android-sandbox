@@ -1,3 +1,6 @@
 package io.mercury.coroutinesandbox.model
 
-data class Movie(val name: String)
+import com.squareup.moshi.Json
+
+data class Movie(
+    @field:Json(name = "title") val title: String)

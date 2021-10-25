@@ -7,12 +7,11 @@ import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 class ListFeature(private val scope: CoroutineScope, private val getMovies: GetMovies) {
 
@@ -31,11 +30,14 @@ class ListFeature(private val scope: CoroutineScope, private val getMovies: GetM
         if (state.value is Uninitialized) {
             scope.launch {
                 updateState(Loading)
-                withContext(Dispatchers.IO) {
-                    delay(2000)
-                    getMovies()
-                }.also { movies ->
+                try {
+                    val movies = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        getMovies()
+                    }
                     updateState(Loaded(movies))
+
+                } catch (e: Exception) {
+                    updateState(State.Error(e))
                 }
             }
         }
@@ -49,6 +51,7 @@ class ListFeature(private val scope: CoroutineScope, private val getMovies: GetM
         object Uninitialized : State()
         object Loading : State()
         data class Loaded(val movies: List<Movie>) : State()
+        data class Error(val exception: Exception) : State()
     }
 
     sealed class Action {

@@ -63,7 +63,6 @@ class ListActivity : ComponentActivity() {
                     .padding(24.dp)
             ) {
 
-
                 state.run {
                     when (this) {
                         is Uninitialized,
@@ -72,6 +71,9 @@ class ListActivity : ComponentActivity() {
                         }
                         is Loaded -> {
                             MoviesList(movies = this.movies)
+                        }
+                        is State.Error -> {
+                            Text(text = "ERROR")
                         }
                     }
                 }
@@ -84,7 +86,7 @@ class ListActivity : ComponentActivity() {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             itemsIndexed(movies) { i, movie ->
                 MovieItem(
-                    movie.name,
+                    movie.title,
                     if (i.isEven()) MaterialTheme.colors.primary else MaterialTheme.colors.secondary,
                     if (i.isEven()) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSecondary,
                 )
