@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -24,12 +26,32 @@ import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 
 @Composable
-fun MoviesList(movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
+fun MoviesColumn(movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         itemsIndexed(movies) { _, movie ->
             MovieCard(
                 movie, favoriteActionHandler
             )
+        }
+    }
+}
+
+@Composable
+fun RowHeader(text: String) {
+    Text(text, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.onBackground)
+}
+
+@Composable
+fun MoviesRow(headerText: String, movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        RowHeader(headerText)
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            itemsIndexed(movies) { _, movie ->
+                MovieCard(
+                    movie, favoriteActionHandler
+                )
+            }
         }
     }
 }

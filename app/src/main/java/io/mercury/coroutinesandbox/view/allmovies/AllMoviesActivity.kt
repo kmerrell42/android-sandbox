@@ -24,7 +24,7 @@ import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State
 import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loading
 import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Uninitialized
-import io.mercury.coroutinesandbox.view.component.MoviesList
+import io.mercury.coroutinesandbox.view.component.MoviesColumn
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -81,7 +81,7 @@ class AllMoviesActivity : ComponentActivity() {
                             Text(text = "Loading...")
                         }
                         is Loaded -> {
-                            MoviesList(movies = this.movies, ::handleFavoriteAction)
+                            MoviesColumn(movies = this.movies, ::handleFavoriteAction)
                         }
                         is State.Error -> {
                             Text(text = "ERROR")

@@ -18,10 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
-import io.mercury.coroutinesandbox.view.component.MoviesList
+import io.mercury.coroutinesandbox.view.component.MoviesColumn
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.Action
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.Action.Load
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Error
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.LoadedEmpty
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loading
@@ -82,7 +83,7 @@ class FavoriteMoviesActivity : ComponentActivity() {
                             Text(text = "Loading...")
                         }
                         is Loaded -> {
-                            MoviesList(movies = this.movies, ::handleFavoriteAction)
+                            MoviesColumn(movies = this.movies, ::handleFavoriteAction)
                         }
                         is LoadedEmpty -> {
                             Text(text = "Please add some favorites")

@@ -22,6 +22,7 @@ import io.mercury.coroutinesandbox.view.component.ClockFactory
 import io.mercury.coroutinesandbox.view.downloader.DownloaderActivity
 import io.mercury.coroutinesandbox.view.ext.startActivity
 import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesActivity
+import io.mercury.coroutinesandbox.view.multirow.MultiRowActivity
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import javax.inject.Inject
 
@@ -68,6 +69,12 @@ class MainActivity : ComponentActivity() {
                     startActivity(FavoriteMoviesActivity::class.java)
                 }) {
                     Text("My Favorite Movies")
+                }
+
+                Button(onClick = {
+                    startActivity(MultiRowActivity::class.java)
+                }) {
+                    Text("Multi-row display of movies")
                 }
             }
         }
