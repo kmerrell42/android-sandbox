@@ -5,6 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.mercury.coroutinesandbox.api.MoviesService
+import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStore
+import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStoreInMemory
 import io.mercury.coroutinesandbox.repos.MoviesStoreImpl
 import io.mercury.domain.repos.MoviesStore
 import retrofit2.Retrofit
@@ -28,5 +30,11 @@ object SingletonModule {
     @Singleton
     fun providesMoviesStore(retrofit: Retrofit): MoviesStore {
         return MoviesStoreImpl(retrofit.create(MoviesService::class.java))
+    }
+
+    @Provides
+    @Singleton
+    fun providesFavoritesMovieStore(): FavoriteMovieIdsStore {
+        return FavoriteMovieIdsStoreInMemory()
     }
 }

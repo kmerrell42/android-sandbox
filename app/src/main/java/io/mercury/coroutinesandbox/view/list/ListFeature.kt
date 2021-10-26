@@ -1,20 +1,32 @@
 package io.mercury.coroutinesandbox.view.list
 
+import io.mercury.coroutinesandbox.interactors.FavorMovie
+import io.mercury.coroutinesandbox.models.FavoriteableMovie
+import io.mercury.coroutinesandbox.interactors.GetFavoritableMovies
+import io.mercury.coroutinesandbox.interactors.UnfavorMovie
+import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Favor
 import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Load
+import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Unfavor
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
-import io.mercury.domain.models.Movie
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ListFeature(
     private val scope: CoroutineScope,
-    private val getMovies: io.mercury.domain.interactors.GetMovies
+    private val getMovies: GetFavoritableMovies,
+    private val favorMovie: FavorMovie,
+    private val unfavorMovie: UnfavorMovie
 ) {
+
+    private var job: Job? = null
 
     private val statePublisher = MutableStateFlow<State>(Uninitialized)
     val state get() = statePublisher.asStateFlow()
@@ -24,19 +36,30 @@ class ListFeature(
             is Load -> {
                 handleLoad()
             }
+            is Favor -> {
+                // Doesn't modify the state directly
+                scope.launch(Dispatchers.IO) { favorMovie(action.movieId) }
+            }
+            is Unfavor -> {
+                // Doesn't modify the state directly
+                scope.launch(Dispatchers.IO) { unfavorMovie(action.movieId) }
+            }
         }
     }
 
     private fun handleLoad() {
         if (state.value is Uninitialized) {
-            scope.launch {
+            job?.cancel() // cancel previous job
+            job = scope.launch {
                 updateState(Loading)
-                try {
-                    val movies = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        getMovies()
-                    }
-                    updateState(Loaded(movies))
 
+                try {
+                    withContext(Dispatchers.IO) {
+                        getMovies()
+                            .collect { movies ->
+                                updateState(Loaded(movies))
+                            }
+                    }
                 } catch (e: Exception) {
                     updateState(State.Error(e))
                 }
@@ -51,11 +74,13 @@ class ListFeature(
     sealed class State {
         object Uninitialized : State()
         object Loading : State()
-        data class Loaded(val movies: List<Movie>) : State()
+        data class Loaded(val movies: List<FavoriteableMovie>) : State()
         data class Error(val exception: Exception) : State()
     }
 
     sealed class Action {
         object Load : Action()
+        data class Favor(val movieId: String) : Action()
+        data class Unfavor(val movieId: String) : Action()
     }
 }
