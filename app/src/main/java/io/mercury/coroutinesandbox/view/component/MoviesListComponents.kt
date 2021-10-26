@@ -18,6 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
@@ -105,11 +107,10 @@ private fun FavoriteIcon(isFavorite: Boolean, modifier: Modifier = Modifier) {
     } else {
         R.drawable.ic_favorite_off
     }.let { drawableResource ->
-        // TODO: Add conditional contentDescription based on isFavorite
-        // TODO: Tint the image
         Image(
             painter = painterResource(id = drawableResource),
-            contentDescription = "",
+            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
             modifier = modifier
         )
     }
