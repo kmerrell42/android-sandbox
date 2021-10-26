@@ -1,8 +1,6 @@
 package io.mercury.coroutinesandbox.view.allmovies
 
-import io.mercury.coroutinesandbox.interactors.FavorMovie
 import io.mercury.coroutinesandbox.interactors.GetAllMovies
-import io.mercury.coroutinesandbox.interactors.UnfavorMovie
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Load
 import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
@@ -19,9 +17,7 @@ import kotlinx.coroutines.withContext
 
 class AllMoviesFeature(
     private val scope: CoroutineScope,
-    private val getMovies: GetAllMovies,
-    private val favorMovie: FavorMovie,
-    private val unfavorMovie: UnfavorMovie
+    private val getMovies: GetAllMovies
 ) {
 
     private var job: Job? = null

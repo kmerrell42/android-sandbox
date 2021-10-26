@@ -10,10 +10,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AllMoviesViewModel @Inject constructor(
-    getFavoritableMovies: GetAllMovies,
-    favorMovie: FavorMovie,
-    unfavorMovie: UnfavorMovie
+    getFavoritableMovies: GetAllMovies
 ) :
     ViewModel() {
-    val feature = AllMoviesFeature(viewModelScope, getFavoritableMovies, favorMovie, unfavorMovie)
+    val feature = AllMoviesFeature(viewModelScope, getFavoritableMovies)
 }
