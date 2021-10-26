@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.view
+package io.mercury.coroutinesandbox.view.util
 
 import java.text.SimpleDateFormat
 import javax.inject.Inject

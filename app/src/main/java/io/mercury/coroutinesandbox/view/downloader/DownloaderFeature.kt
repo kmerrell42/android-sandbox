@@ -1,6 +1,6 @@
 package io.mercury.coroutinesandbox.view.downloader
 
-import io.mercury.coroutinesandbox.usecases.DownloadUpdate
+import io.mercury.coroutinesandbox.interactors.DownloadUpdate
 import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Action.Cancel
 import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Action.Unload
 import io.mercury.coroutinesandbox.view.downloader.DownloaderFeature.Event.Download

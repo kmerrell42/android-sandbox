@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.mercury.coroutinesandbox.usecases.GetTime
-import io.mercury.coroutinesandbox.view.DateTimeFormatter
+import io.mercury.coroutinesandbox.interactors.GetTime
+import io.mercury.coroutinesandbox.view.util.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 

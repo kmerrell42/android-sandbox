@@ -1,19 +1,20 @@
 package io.mercury.coroutinesandbox.view.list
 
-import io.mercury.coroutinesandbox.model.Movie
-import io.mercury.coroutinesandbox.usecases.GetMovies
 import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Load
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
+import io.mercury.domain.models.Movie
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 
-class ListFeature(private val scope: CoroutineScope, private val getMovies: GetMovies) {
+class ListFeature(
+    private val scope: CoroutineScope,
+    private val getMovies: io.mercury.domain.interactors.GetMovies
+) {
 
     private val statePublisher = MutableStateFlow<State>(Uninitialized)
     val state get() = statePublisher.asStateFlow()

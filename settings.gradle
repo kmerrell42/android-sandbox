@@ -1,2 +1,3 @@
 rootProject.name = "Coroutine Sandbox"
 include ':app'
+include ':domain'

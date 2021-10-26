@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.usecases
+package io.mercury.coroutinesandbox.interactors
 
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay

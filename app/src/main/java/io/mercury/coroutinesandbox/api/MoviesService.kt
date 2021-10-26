@@ -1,6 +1,6 @@
 package io.mercury.coroutinesandbox.api
 
-import io.mercury.coroutinesandbox.model.Movie
+import io.mercury.domain.models.Movie
 import retrofit2.Call
 import retrofit2.http.GET
 

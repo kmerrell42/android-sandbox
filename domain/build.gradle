@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+//    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    // Need this only because we parse with Moshi.
+    // TODO: Feels weird, but otherwise, we would have to setup an adapter or ???
+    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
+
+    // Need this so that we can annotate models for DI in modules dependent on this one
+    // TODO: This feels weird, but keeps us from having to do manual DI.
+    implementation group: 'javax.inject', name: 'javax.inject', version: '1'
+}

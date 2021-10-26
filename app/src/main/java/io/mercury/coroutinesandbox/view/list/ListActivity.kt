@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import io.mercury.coroutinesandbox.model.Movie
 import io.mercury.coroutinesandbox.view.list.ListFeature.Action
 import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Load
 import io.mercury.coroutinesandbox.view.list.ListFeature.State
@@ -30,6 +29,7 @@ import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
 import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
+import io.mercury.domain.models.Movie
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
