@@ -1,13 +1,13 @@
-package io.mercury.coroutinesandbox.view.allmovies
+package io.mercury.coroutinesandbox.view.favoritemovies
 
-import io.mercury.coroutinesandbox.interactors.FavorMovie
-import io.mercury.coroutinesandbox.interactors.GetAllMovies
-import io.mercury.coroutinesandbox.interactors.UnfavorMovie
+import io.mercury.coroutinesandbox.interactors.GetFavoritedMovies
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Load
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loading
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Uninitialized
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.Action.Load
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Error
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loaded
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.LoadedEmpty
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loading
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Uninitialized
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,17 +17,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AllMoviesFeature(
+class FavoriteMoviesFeature(
     private val scope: CoroutineScope,
-    private val getMovies: GetAllMovies,
-    private val favorMovie: FavorMovie,
-    private val unfavorMovie: UnfavorMovie
+    private val getFavoritedMovies: GetFavoritedMovies
 ) {
-
-    private var job: Job? = null
 
     private val statePublisher = MutableStateFlow<State>(Uninitialized)
     val state get() = statePublisher.asStateFlow()
+
+    private var job: Job? = null
 
     fun onAction(action: Action) {
         when (action) {
@@ -45,13 +43,17 @@ class AllMoviesFeature(
 
                 try {
                     withContext(Dispatchers.IO) {
-                        getMovies()
+                        getFavoritedMovies()
                             .collect { movies ->
-                                updateState(Loaded(movies))
+                                if (movies.isEmpty()) {
+                                    updateState(LoadedEmpty)
+                                } else {
+                                    updateState(Loaded(movies))
+                                }
                             }
                     }
                 } catch (e: Exception) {
-                    updateState(State.Error(e))
+                    updateState(Error(e))
                 }
             }
         }
@@ -65,6 +67,7 @@ class AllMoviesFeature(
         object Uninitialized : State()
         object Loading : State()
         data class Loaded(val movies: List<FavoriteableMovie>) : State()
+        object LoadedEmpty : State()
         data class Error(val exception: Exception) : State()
     }
 

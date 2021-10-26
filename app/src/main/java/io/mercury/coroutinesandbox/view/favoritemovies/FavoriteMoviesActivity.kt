@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.view.allmovies
+package io.mercury.coroutinesandbox.view.favoritemovies
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,13 +18,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Load
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loading
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Uninitialized
 import io.mercury.coroutinesandbox.view.component.MoviesList
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.Action
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.Action.Load
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loaded
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.LoadedEmpty
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Loading
+import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesFeature.State.Uninitialized
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AllMoviesActivity : ComponentActivity() {
+class FavoriteMoviesActivity : ComponentActivity() {
 
     @Inject
     lateinit var favoriteMoviesManager: FavoriteMoviesManager
@@ -43,7 +44,7 @@ class AllMoviesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val model: AllMoviesViewModel by viewModels()
+        val model: FavoriteMoviesViewModel by viewModels()
 
         setContent {
             val state by model.feature.state.collectAsState(lifecycleScope.coroutineContext)
@@ -83,7 +84,10 @@ class AllMoviesActivity : ComponentActivity() {
                         is Loaded -> {
                             MoviesList(movies = this.movies, ::handleFavoriteAction)
                         }
-                        is State.Error -> {
+                        is LoadedEmpty -> {
+                            Text(text = "Please add some favorites")
+                        }
+                        is Error -> {
                             Text(text = "ERROR")
                         }
                     }
