@@ -17,11 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import io.mercury.coroutinesandbox.view.allmovies.AllMoviesActivity
 import io.mercury.coroutinesandbox.view.component.ClockFactory
 import io.mercury.coroutinesandbox.view.downloader.DownloaderActivity
 import io.mercury.coroutinesandbox.view.ext.startActivity
-import io.mercury.coroutinesandbox.view.favoritemovies.FavoriteMoviesActivity
 import io.mercury.coroutinesandbox.view.multirow.MultiRowActivity
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import javax.inject.Inject
@@ -57,18 +55,6 @@ class MainActivity : ComponentActivity() {
                     startActivity(DownloaderActivity::class.java)
                 }) {
                     Text("Downloader")
-                }
-
-                Button(onClick = {
-                    startActivity(AllMoviesActivity::class.java)
-                }) {
-                    Text("All Movies")
-                }
-
-                Button(onClick = {
-                    startActivity(FavoriteMoviesActivity::class.java)
-                }) {
-                    Text("My Favorite Movies")
                 }
 
                 Button(onClick = {

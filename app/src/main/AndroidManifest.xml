@@ -22,8 +22,6 @@
         </activity>
 
         <activity android:name=".view.downloader.DownloaderActivity" />
-        <activity android:name=".view.allmovies.AllMoviesActivity" />
-        <activity android:name=".view.favoritemovies.FavoriteMoviesActivity" />
         <activity android:name=".view.multirow.MultiRowActivity" />
     </application>
 

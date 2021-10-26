@@ -28,17 +28,6 @@ import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 
 @Composable
-fun MoviesColumn(movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        itemsIndexed(movies) { _, movie ->
-            MovieCard(
-                movie, favoriteActionHandler
-            )
-        }
-    }
-}
-
-@Composable
 fun RowHeader(text: String) {
     Text(text, style = MaterialTheme.typography.h5, color = MaterialTheme.colors.onBackground)
 }
