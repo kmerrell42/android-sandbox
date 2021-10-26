@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.view.component.ClockFactory
 import io.mercury.coroutinesandbox.view.downloader.DownloaderActivity
 import io.mercury.coroutinesandbox.view.ext.startActivity
-import io.mercury.coroutinesandbox.view.list.ListActivity
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesActivity
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import javax.inject.Inject
 
@@ -58,9 +58,9 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Button(onClick = {
-                    startActivity(ListActivity::class.java)
+                    startActivity(AllMoviesActivity::class.java)
                 }) {
-                    Text("List")
+                    Text("All Movies")
                 }
             }
         }

@@ -1,15 +1,15 @@
-package io.mercury.coroutinesandbox.view.list
+package io.mercury.coroutinesandbox.view.allmovies
 
 import io.mercury.coroutinesandbox.interactors.FavorMovie
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 import io.mercury.coroutinesandbox.interactors.GetFavoritableMovies
 import io.mercury.coroutinesandbox.interactors.UnfavorMovie
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Favor
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Load
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Unfavor
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Favor
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Load
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Unfavor
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loading
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Uninitialized
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ListFeature(
+class AllMoviesFeature(
     private val scope: CoroutineScope,
     private val getMovies: GetFavoritableMovies,
     private val favorMovie: FavorMovie,

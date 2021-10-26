@@ -1,4 +1,4 @@
-package io.mercury.coroutinesandbox.view.list
+package io.mercury.coroutinesandbox.view.allmovies
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,28 +28,28 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Favor
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Load
-import io.mercury.coroutinesandbox.view.list.ListFeature.Action.Unfavor
-import io.mercury.coroutinesandbox.view.list.ListFeature.State
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loaded
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Loading
-import io.mercury.coroutinesandbox.view.list.ListFeature.State.Uninitialized
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Favor
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Load
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.Action.Unfavor
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loaded
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Loading
+import io.mercury.coroutinesandbox.view.allmovies.AllMoviesFeature.State.Uninitialized
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ListActivity : ComponentActivity() {
+class AllMoviesActivity : ComponentActivity() {
 
     private val actionPublisher = MutableSharedFlow<Action>(replay = 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val model: ListViewModel by viewModels()
+        val model: AllMoviesViewModel by viewModels()
 
         setContent {
             val state by model.feature.state.collectAsState(lifecycleScope.coroutineContext)
