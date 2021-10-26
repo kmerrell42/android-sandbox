@@ -1,58 +1,67 @@
 package io.mercury.coroutinesandbox.view.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Button
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import coil.size.Scale
 import io.mercury.coroutinesandbox.R
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 
 @Composable
 fun MoviesList(movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        itemsIndexed(movies) { i, movie ->
-            MovieItem(
-                movie,
-                if (i.isEven()) MaterialTheme.colors.primary else MaterialTheme.colors.secondary,
-                if (i.isEven()) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSecondary,
-                favoriteActionHandler
+        itemsIndexed(movies) { _, movie ->
+            MovieCard(
+                movie, favoriteActionHandler
             )
         }
     }
 }
 
 @Composable
-private fun MovieItem(
+private fun MovieCard(
     movie: FavoriteableMovie,
-    backgroundColor: Color,
-    textColor: Color,
     favoriteActionHandler: (String, Boolean) -> Unit
 ) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(16.dp, 4.dp)
-    ) {
-        Text(
-            text = movie.title,
-            color = textColor
+    Card {
+        Box(
+            Modifier
+                .width(140.dp)
+                .height(240.dp)
+        ) {
+            val imageLoaded = remember { mutableStateOf(false) }
+            Image(rememberImagePainter(data = movie.posterUrl,
+                builder = {
+                    scale(Scale.FILL) // This doesn't work as expected
+                        .listener(onSuccess =  { _,_ -> imageLoaded.value = true })
+                }), movie.title)
 
-        )
-        FavoriteButton(movie, favoriteActionHandler, Modifier.align(Alignment.CenterEnd))
+            // Only show the text title if we aren't showing the poster
+            if (!imageLoaded.value) {
+                Text(
+                    text = movie.title,
+                    color = MaterialTheme.colors.primary
+                )
+            }
+
+            FavoriteButton(movie, favoriteActionHandler, Modifier.align(Alignment.BottomEnd))
+        }
     }
 }
 
@@ -62,11 +71,9 @@ private fun FavoriteButton(
     actionHandler: (String, Boolean) -> Unit,
     modifier: Modifier
 ) {
-    Button(onClick = {
-        actionHandler(favoriteableMovie.id, !favoriteableMovie.isFavorite)
-    }, modifier = modifier) {
-        FavoriteIcon(isFavorite = favoriteableMovie.isFavorite)
-    }
+    FavoriteIcon(
+        isFavorite = favoriteableMovie.isFavorite,
+        modifier.clickable { actionHandler(favoriteableMovie.id, !favoriteableMovie.isFavorite) })
 }
 
 @Composable
@@ -84,8 +91,4 @@ private fun FavoriteIcon(isFavorite: Boolean, modifier: Modifier = Modifier) {
             modifier = modifier
         )
     }
-}
-
-private fun Int.isEven(): Boolean {
-    return this % 2 == 0
 }

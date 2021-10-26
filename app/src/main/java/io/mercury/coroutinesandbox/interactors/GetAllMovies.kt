@@ -24,6 +24,6 @@ class GetAllMovies @Inject constructor(
 
 private fun List<Movie>.mapToFavoritables(favorites: Set<String>): List<FavoriteableMovie> {
     return map { movie ->
-        FavoriteableMovie(movie.id, movie.title, favorites.contains(movie.id))
+        FavoriteableMovie(movie.id, movie.title, movie.posterUrl, favorites.contains(movie.id))
     }
 }
