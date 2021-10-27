@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.view.component.ClockFactory
+import io.mercury.coroutinesandbox.view.downloader.DownloadListActivity
 import io.mercury.coroutinesandbox.view.downloader.DownloaderActivity
 import io.mercury.coroutinesandbox.view.ext.startActivity
 import io.mercury.coroutinesandbox.view.multirow.MultiRowActivity
@@ -55,6 +56,12 @@ class MainActivity : ComponentActivity() {
                     startActivity(DownloaderActivity::class.java)
                 }) {
                     Text("Downloader")
+                }
+
+                Button(onClick = {
+                    startActivity(DownloadListActivity::class.java)
+                }) {
+                    Text("Download List")
                 }
 
                 Button(onClick = {

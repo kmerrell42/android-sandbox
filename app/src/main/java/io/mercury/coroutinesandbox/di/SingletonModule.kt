@@ -5,6 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.mercury.coroutinesandbox.api.MoviesService
+import io.mercury.coroutinesandbox.repos.DownloadedMovieStore
+import io.mercury.coroutinesandbox.repos.DownloadedMoviesStoreInMemory
 import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStore
 import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStoreInMemory
 import io.mercury.coroutinesandbox.repos.MoviesStoreImpl
@@ -36,5 +38,11 @@ object SingletonModule {
     @Singleton
     fun providesFavoritesMovieStore(): FavoriteMovieIdsStore {
         return FavoriteMovieIdsStoreInMemory()
+    }
+
+    @Provides
+    @Singleton
+    fun providesDownloadedMoviesStore() : DownloadedMovieStore {
+        return DownloadedMoviesStoreInMemory()
     }
 }
