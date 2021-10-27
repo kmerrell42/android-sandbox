@@ -23,6 +23,7 @@
 
         <activity android:name=".view.downloader.DownloaderActivity" />
         <activity android:name=".view.multirow.MultiRowActivity" />
+        <activity android:name=".view.downloader.DownloadListActivity" />
     </application>
 
 </manifest>
