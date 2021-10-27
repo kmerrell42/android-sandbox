@@ -5,7 +5,8 @@ import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
 import io.mercury.domain.interactors.GetMovies
 import io.mercury.domain.models.Movie
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,9 +16,10 @@ class GetFavoritableMovies @Inject constructor(
     private val favoritesStore: FavoriteMoviesManager
 ) {
     operator fun invoke(): Flow<List<FavoriteableMovie>> {
+        val moviesFlow = flowOf(getMovies())
         return favoritesStore.collection
-            .map { favorites ->
-                getMovies().mapToFavoritables(favorites)
+            .combine(moviesFlow) { favorites, movies ->
+                movies.mapToFavoritables(favorites)
             }
     }
 }
