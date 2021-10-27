@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetAllMovies @Inject constructor(
+class GetFavoritableMovies @Inject constructor(
     private val getMovies: GetMovies,
     private val favoritesStore: FavoriteMoviesManager
 ) {

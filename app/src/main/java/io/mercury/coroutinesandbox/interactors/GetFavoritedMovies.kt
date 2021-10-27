@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GetFavoritedMovies @Inject constructor(private val getAllMovies: GetAllMovies) {
+class GetFavoritedMovies @Inject constructor(private val getAllMovies: GetFavoritableMovies) {
     operator fun invoke(): Flow<List<FavoriteableMovie>> {
         return getAllMovies()
             .map { movies ->

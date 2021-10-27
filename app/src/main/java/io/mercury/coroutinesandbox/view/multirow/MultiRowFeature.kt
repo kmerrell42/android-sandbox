@@ -1,6 +1,6 @@
 package io.mercury.coroutinesandbox.view.multirow
 
-import io.mercury.coroutinesandbox.interactors.GetAllMovies
+import io.mercury.coroutinesandbox.interactors.GetFavoritableMovies
 import io.mercury.coroutinesandbox.interactors.GetFavoritedMovies
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.FavoriteCollection
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 
 class MultiRowFeature(
     private val scope: CoroutineScope,
-    private val getAllMovies: GetAllMovies,
+    private val getAllMovies: GetFavoritableMovies,
     private val getFavoritedMovies: GetFavoritedMovies
 ) {
     private val statePublisher = MutableStateFlow<State>(Uninitialized)
