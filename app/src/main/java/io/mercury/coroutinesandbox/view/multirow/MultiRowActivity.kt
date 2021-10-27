@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
 import io.mercury.coroutinesandbox.view.component.MoviesRow
 import io.mercury.coroutinesandbox.view.component.RowHeader
+import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.FavoriteCollection
+import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.StandardCollection
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.State
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.State.Error
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.State.Loaded
@@ -84,51 +87,32 @@ class MultiRowActivity : ComponentActivity() {
                         }
                         is Loaded -> {
                             LazyColumn(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                                item {
-                                    MoviesRow(
-                                        "All Movies (${state.allMovies.size})",
-                                        movies = state.allMovies,
-                                        favoriteActionHandler = ::handleFavoriteAction
-                                    )
-                                }
 
-                                item {
-                                    if (state.favoriteMovies.isEmpty()) {
-                                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                            RowHeader("Your Favorite Movies (${state.favoriteMovies.size})")
-                                            Text("Please favorite some movies", color = MaterialTheme.colors.primary)
+                                items(state.movieCollections) { item ->
+                                    when(item) {
+                                        is StandardCollection -> {
+                                            MoviesRow(
+                                                "${item.title} (${item.movies.size})",
+                                                movies = item.movies,
+                                                favoriteActionHandler = ::handleFavoriteAction
+                                            )
                                         }
-                                    } else {
-                                        MoviesRow(
-                                            "Your Favorite Movies (${state.favoriteMovies.size})",
-                                            movies = state.favoriteMovies,
-                                            favoriteActionHandler = ::handleFavoriteAction
-                                        )
+                                        is FavoriteCollection -> {
+                                            val rowTitle = "${item.title} (${item.movies.size})"
+                                            if (item.movies.isEmpty()) {
+                                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                    RowHeader(rowTitle)
+                                                    Text("Please favorite some movies", color = MaterialTheme.colors.primary)
+                                                }
+                                            } else {
+                                                MoviesRow(
+                                                    rowTitle,
+                                                    movies = item.movies,
+                                                    favoriteActionHandler = ::handleFavoriteAction
+                                                )
+                                            }
+                                        }
                                     }
-                                }
-
-                                item {
-                                    MoviesRow(
-                                        "More Movies (${state.allMovies.size})",
-                                        movies = state.allMovies.sortedBy { it.title },
-                                        favoriteActionHandler = ::handleFavoriteAction
-                                    )
-                                }
-
-                                item {
-                                    MoviesRow(
-                                        "Even More Movies (${state.allMovies.size})",
-                                        movies = state.allMovies.sortedByDescending { it.title },
-                                        favoriteActionHandler = ::handleFavoriteAction
-                                    )
-                                }
-
-                                item {
-                                    MoviesRow(
-                                        "Yet Even More Movies (${state.allMovies.size})",
-                                        movies = state.allMovies.sortedBy { it.id },
-                                        favoriteActionHandler = ::handleFavoriteAction
-                                    )
                                 }
                             }
                         }

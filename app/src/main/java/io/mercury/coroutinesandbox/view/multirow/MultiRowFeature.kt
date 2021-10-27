@@ -3,6 +3,8 @@ package io.mercury.coroutinesandbox.view.multirow
 import io.mercury.coroutinesandbox.interactors.GetAllMovies
 import io.mercury.coroutinesandbox.interactors.GetFavoritedMovies
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
+import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.FavoriteCollection
+import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.StandardCollection
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.State.Loading
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.State.Uninitialized
 import kotlinx.coroutines.CoroutineScope
@@ -38,8 +40,15 @@ class MultiRowFeature(
             statePublisher.emit(Loading)
             withContext(Dispatchers.IO) {
                 getAllMovies().combine(getFavoritedMovies()) { all, favorites ->
-                    State.Loaded(all, favorites)
-
+                    arrayListOf(
+                        StandardCollection(all, "All Movies"),
+                        FavoriteCollection(favorites, "Your Favorite Movies"),
+                        StandardCollection(all.sortedBy { it.title }, "A-Z Movies"),
+                        StandardCollection(all.sortedByDescending { it.title }, "Z-A Movies"),
+                        StandardCollection(all.sortedBy { it.id }, "More Movies")
+                    ).let { collectionList ->
+                        State.Loaded(collectionList)
+                    }
                 }.collect { loadedState ->
                     statePublisher.emit(loadedState)
                 }
@@ -51,10 +60,18 @@ class MultiRowFeature(
         object Uninitialized : State()
         object Loading : State()
         data class Loaded(
-            val allMovies: List<FavoriteableMovie>,
-            val favoriteMovies: List<FavoriteableMovie>
+            val movieCollections: List<MovieCollection>
         ) : State()
 
         data class Error(val e: Exception) : State()
     }
+
+    sealed class MovieCollection() {
+        abstract val movies: List<FavoriteableMovie>
+        abstract val title: String
+
+        data class StandardCollection(override val movies: List<FavoriteableMovie>, override val title: String) : MovieCollection()
+        data class FavoriteCollection(override val movies: List<FavoriteableMovie>, override val title: String) : MovieCollection()
+    }
+
 }
