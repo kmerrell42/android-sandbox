@@ -25,13 +25,8 @@ class MultiRowFeature(
     val state get() = statePublisher.asStateFlow()
 
     fun load() {
-        when (state.value) {
-            is Uninitialized -> {
-                handleLoad()
-            }
-            else -> {
-                // no-op
-            }
+        if (state.value is Uninitialized) {
+            handleLoad()
         }
     }
 
