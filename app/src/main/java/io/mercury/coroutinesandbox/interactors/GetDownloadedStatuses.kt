@@ -2,36 +2,34 @@ package io.mercury.coroutinesandbox.interactors
 
 import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.Downloaded
 import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.Downloading
-import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.NotDownloaded
-import io.mercury.domain.interactors.GetMovies
+import io.mercury.coroutinesandbox.repos.DownloadedMovieStore
+import io.mercury.coroutinesandbox.repos.MovieDownloadManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class GetDownloadedStatuses @Inject constructor(
-    val getMovies: GetMovies,
-    val getDownloadedMovies: GetDownloadedMovies,
-    val getInProgressDownloads: GetInProgressDownloads
+    private val downloadedMovieStore: DownloadedMovieStore,
+    private val downloadManager: MovieDownloadManager,
 ) {
     operator fun invoke(): Flow<Map<String, DownloadState>> {
-        val allMovies = getMovies()
-        return getDownloadedMovies().combine(getInProgressDownloads()) { downloaded, inprogress ->
-            HashMap<String, DownloadState>().also { stateMap ->
-                allMovies.forEach { movie ->
-                    if (downloaded.find { it.id == movie.id } != null) {
-                        Downloaded
-                    } else {
-                        inprogress.find { it.id == movie.id }?.let { inProgressDownload ->
-                            Downloading(inProgressDownload.downloadProgress)
-                        } ?: run {
-                            NotDownloaded
+        return downloadManager.downloadJobs
+            .combine(flow { emit(downloadedMovieStore.getIds()) }) { inprogress, downloaded ->
+                HashMap<String, DownloadState>()
+                    .also { stateMap ->
+                        downloaded.forEach { id ->
+                            stateMap[id] = Downloaded
                         }
-                    }.also { downloadState ->
-                            stateMap[movie.id] = downloadState
-                        }
-                }
+
+                        stateMap.putAll(inprogress.mapValues { entry ->
+                            Downloading(entry.value.percent)
+                        })
+
+                    }
             }
-        }
     }
 
     sealed class DownloadState {

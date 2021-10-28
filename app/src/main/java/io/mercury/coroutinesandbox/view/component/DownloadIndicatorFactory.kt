@@ -54,8 +54,6 @@ class DownloadIndicatorFactory @Inject constructor(
         val state = remember {
             getDownloadStatusUpdates(id, coroutineScope)
         }.collectAsState()
-//        val state = getDownloadStatusUpdates(id, coroutineScope)
-//            .collectAsState()
 
         state.value.run {
             return when (this) {
