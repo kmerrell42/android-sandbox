@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
-import io.mercury.coroutinesandbox.view.component.DownloadIndicatorFactory
+import io.mercury.coroutinesandbox.view.component.MovieCardFactory
 import io.mercury.coroutinesandbox.view.component.MoviesRow
 import io.mercury.coroutinesandbox.view.component.RowHeader
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.FavoriteCollection
@@ -44,7 +44,7 @@ class MultiRowActivity : ComponentActivity() {
     lateinit var favoriteMoviesManager: FavoriteMoviesManager
 
     @Inject
-    lateinit var downloadIndicatorFactory: DownloadIndicatorFactory
+    lateinit var movieCaFactory: MovieCardFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +98,7 @@ class MultiRowActivity : ComponentActivity() {
                                             MoviesRow(
                                                 "${item.title} (${item.movies.size})",
                                                 movies = item.movies,
-                                                downloadIndicatorFactory = downloadIndicatorFactory,
+                                                movieCardFactory = movieCaFactory,
                                                 favoriteActionHandler = ::handleFavoriteAction
                                             )
                                         }
@@ -116,7 +116,7 @@ class MultiRowActivity : ComponentActivity() {
                                                 MoviesRow(
                                                     rowTitle,
                                                     movies = item.movies,
-                                                    downloadIndicatorFactory = downloadIndicatorFactory,
+                                                    movieCardFactory = movieCaFactory,
                                                     favoriteActionHandler = ::handleFavoriteAction
                                                 )
                                             }
