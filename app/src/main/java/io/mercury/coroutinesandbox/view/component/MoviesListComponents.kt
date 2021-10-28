@@ -1,7 +1,6 @@
 package io.mercury.coroutinesandbox.view.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,13 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.size.Scale
-import io.mercury.coroutinesandbox.R
-import io.mercury.coroutinesandbox.models.FavoriteableMovie
+import dagger.hilt.android.scopes.ActivityScoped
+import io.mercury.coroutinesandbox.interactors.GetMovieSummaries.MovieSummary
+import javax.inject.Inject
 
 @Composable
 fun RowHeader(text: String) {
@@ -33,8 +31,8 @@ fun RowHeader(text: String) {
 @Composable
 fun MoviesRow(
     headerText: String,
-    movies: List<FavoriteableMovie>,
-    downloadIndicatorFactory: DownloadIndicatorFactory,
+    movies: List<MovieSummary>,
+    movieCardFactory: MovieCardFactory,
     favoriteActionHandler: (String, Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -43,17 +41,23 @@ fun MoviesRow(
         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             items(movies, { it.id }) { movie ->
                 MovieCard(
-                    movie, downloadIndicatorFactory, favoriteActionHandler
+                    movie, movieCardFactory, favoriteActionHandler
                 )
             }
         }
     }
 }
 
+@ActivityScoped
+data class MovieCardFactory @Inject constructor(
+    val favoriteButtonfactory: FavoriteButtonFactory,
+    val downloadIndicatorFactory: DownloadIndicatorFactory
+)
+
 @Composable
 private fun MovieCard(
-    movie: FavoriteableMovie,
-    downloadIndicatorFactory: DownloadIndicatorFactory,
+    movie: MovieSummary,
+    movieCardFactory: MovieCardFactory,
     favoriteActionHandler: (String, Boolean) -> Unit
 ) {
     Card {
@@ -79,37 +83,15 @@ private fun MovieCard(
                 )
             }
 
-            FavoriteButton(movie, favoriteActionHandler, Modifier.align(Alignment.BottomEnd))
-            downloadIndicatorFactory.DownloadIndicator(movie.id)
+            movieCardFactory.favoriteButtonfactory.FavoriteButton(
+                movie.id,
+                favoriteActionHandler,
+                Modifier.align(Alignment.BottomEnd)
+            )
+            movieCardFactory.downloadIndicatorFactory.DownloadIndicator(movie.id)
         }
     }
 }
 
-@Composable
-private fun FavoriteButton(
-    favoriteableMovie: FavoriteableMovie,
-    actionHandler: (String, Boolean) -> Unit,
-    modifier: Modifier
-) {
-    FavoriteIcon(
-        isFavorite = favoriteableMovie.isFavorite,
-        modifier.clickable { actionHandler(favoriteableMovie.id, !favoriteableMovie.isFavorite) })
-}
-
-@Composable
-private fun FavoriteIcon(isFavorite: Boolean, modifier: Modifier = Modifier) {
-    if (isFavorite) {
-        R.drawable.ic_favorite_on
-    } else {
-        R.drawable.ic_favorite_off
-    }.let { drawableResource ->
-        Image(
-            painter = painterResource(id = drawableResource),
-            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
-            modifier = modifier
-        )
-    }
-}
 
 
