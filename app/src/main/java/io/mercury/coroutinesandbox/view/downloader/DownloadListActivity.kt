@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.interactors.DownloadMovie
+import io.mercury.coroutinesandbox.view.component.DownloadIndicatorFactory
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Error
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Loaded
@@ -41,6 +42,9 @@ class DownloadListActivity : ComponentActivity() {
 
     @Inject
     lateinit var downloadMovie: DownloadMovie
+
+    @Inject
+    lateinit var downloadIndicatorFactory: DownloadIndicatorFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +85,13 @@ class DownloadListActivity : ComponentActivity() {
                                 Text("Downloading:")
                                 LazyColumn {
                                     items(state.inProgressDownloads) { download ->
-                                        Text("${download.title} - ${download.downloadProgress}%")
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            Text(download.title)
+                                            downloadIndicatorFactory.DownloadIndicator(
+                                                id = download.id,
+                                                Modifier.align(Alignment.TopEnd)
+                                            )
+                                        }
                                     }
                                 }
                             }
