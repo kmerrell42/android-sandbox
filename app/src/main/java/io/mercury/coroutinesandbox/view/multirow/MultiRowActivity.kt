@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.mercury.coroutinesandbox.repos.FavoriteMoviesManager
+import io.mercury.coroutinesandbox.view.component.DownloadIndicatorFactory
 import io.mercury.coroutinesandbox.view.component.MoviesRow
 import io.mercury.coroutinesandbox.view.component.RowHeader
 import io.mercury.coroutinesandbox.view.multirow.MultiRowFeature.MovieCollection.FavoriteCollection
@@ -41,6 +42,9 @@ class MultiRowActivity : ComponentActivity() {
 
     @Inject
     lateinit var favoriteMoviesManager: FavoriteMoviesManager
+
+    @Inject
+    lateinit var downloadIndicatorFactory: DownloadIndicatorFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,11 +93,12 @@ class MultiRowActivity : ComponentActivity() {
                             LazyColumn(verticalArrangement = Arrangement.spacedBy(24.dp)) {
 
                                 items(state.movieCollections) { item ->
-                                    when(item) {
+                                    when (item) {
                                         is StandardCollection -> {
                                             MoviesRow(
                                                 "${item.title} (${item.movies.size})",
                                                 movies = item.movies,
+                                                downloadIndicatorFactory = downloadIndicatorFactory,
                                                 favoriteActionHandler = ::handleFavoriteAction
                                             )
                                         }
@@ -102,12 +107,16 @@ class MultiRowActivity : ComponentActivity() {
                                             if (item.movies.isEmpty()) {
                                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                                     RowHeader(rowTitle)
-                                                    Text("Please favorite some movies", color = MaterialTheme.colors.primary)
+                                                    Text(
+                                                        "Please favorite some movies",
+                                                        color = MaterialTheme.colors.primary
+                                                    )
                                                 }
                                             } else {
                                                 MoviesRow(
                                                     rowTitle,
                                                     movies = item.movies,
+                                                    downloadIndicatorFactory = downloadIndicatorFactory,
                                                     favoriteActionHandler = ::handleFavoriteAction
                                                 )
                                             }
