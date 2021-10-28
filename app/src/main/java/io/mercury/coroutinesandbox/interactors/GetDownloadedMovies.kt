@@ -4,7 +4,8 @@ import io.mercury.coroutinesandbox.repos.MovieDownloadManager
 import io.mercury.domain.interactors.GetMovies
 import io.mercury.domain.models.Movie
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,9 +15,9 @@ class GetDownloadedMovies @Inject constructor(
     private val getMovies: GetMovies
 ) {
     operator fun invoke(): Flow<List<Movie>> {
-        val allMovies = getMovies.invoke()
-        return downloadManager.downloadMovies.map { downloadedMovieIds ->
+        return flow { emit(getMovies()) }.combine(downloadManager.downloadMovies) { allMovies, downloadedMovieIds ->
             allMovies.filter { downloadedMovieIds.contains(it.id) }
         }
+
     }
 }

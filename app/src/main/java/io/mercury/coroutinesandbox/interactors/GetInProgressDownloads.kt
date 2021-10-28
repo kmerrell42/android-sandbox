@@ -4,7 +4,7 @@ import io.mercury.coroutinesandbox.repos.MovieDownloadManager
 import io.mercury.domain.interactors.GetMovies
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,9 +14,8 @@ class GetInProgressDownloads @Inject constructor(
     private val getMovies: GetMovies
 ) {
     operator fun invoke(): Flow<List<InProgressDownload>> {
-        val moviesFlow = flowOf(getMovies())
         return downloadManager.downloadJobs
-            .combine(moviesFlow) { jobs, movies ->
+            .combine(flow { emit(getMovies()) }) { jobs, movies ->
                 jobs.values.mapNotNull { downloadStatus ->
                     movies.find { it.id == downloadStatus.id }?.let { movie ->
                         InProgressDownload(downloadStatus.id, movie.title, downloadStatus.percent)
