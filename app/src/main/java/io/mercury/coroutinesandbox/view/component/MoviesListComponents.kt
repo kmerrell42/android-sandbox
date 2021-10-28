@@ -19,10 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.size.Scale
 import io.mercury.coroutinesandbox.R
+import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState
+import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.Downloaded
+import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.Downloading
+import io.mercury.coroutinesandbox.interactors.GetDownloadedStatuses.DownloadState.NotDownloaded
 import io.mercury.coroutinesandbox.models.FavoriteableMovie
 
 @Composable
@@ -31,7 +36,11 @@ fun RowHeader(text: String) {
 }
 
 @Composable
-fun MoviesRow(headerText: String, movies: List<FavoriteableMovie>, favoriteActionHandler: (String, Boolean) -> Unit) {
+fun MoviesRow(
+    headerText: String,
+    movies: List<FavoriteableMovie>,
+    favoriteActionHandler: (String, Boolean) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         RowHeader(headerText)
 
@@ -60,8 +69,9 @@ private fun MovieCard(
             Image(rememberImagePainter(data = movie.posterUrl,
                 builder = {
                     scale(Scale.FILL) // This doesn't work as expected
-                        .listener(onSuccess =  { _,_ -> imageLoaded.value = true })
-                }), movie.title)
+                        .listener(onSuccess = { _, _ -> imageLoaded.value = true })
+                }), movie.title
+            )
 
             // Only show the text title if we aren't showing the poster
             if (!imageLoaded.value) {
@@ -72,6 +82,7 @@ private fun MovieCard(
             }
 
             FavoriteButton(movie, favoriteActionHandler, Modifier.align(Alignment.BottomEnd))
+            DownloadIndicator(movie.downloadState)
         }
     }
 }
@@ -102,3 +113,21 @@ private fun FavoriteIcon(isFavorite: Boolean, modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Composable
+private fun DownloadIndicator(state: DownloadState, modifier: Modifier = Modifier) {
+    return when (state) {
+        is Downloaded -> "Downloaded"
+        is NotDownloaded -> "Not Downloaded"
+        is Downloading -> "Downloading: ${state.percent}"
+    }.let { msg ->
+        Text(
+            text = msg,
+            color = MaterialTheme.colors.primary,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = modifier
+        )
+    }
+}
+
+
