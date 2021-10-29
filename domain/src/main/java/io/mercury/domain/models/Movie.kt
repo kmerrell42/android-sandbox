@@ -1,9 +1,11 @@
 package io.mercury.domain.models
 
-import com.squareup.moshi.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Movie(
-    @field:Json(name = "imdbId") val id: String,
-    @field:Json(name = "title") val title: String,
-    @field:Json(name = "poster") val posterUrl: String
+    @SerialName("imdbId")val id: String,
+    val title: String,
+    @SerialName("poster") val posterUrl: String
 )
