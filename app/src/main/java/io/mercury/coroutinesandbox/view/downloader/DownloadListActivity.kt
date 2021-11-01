@@ -20,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.mercury.coroutinesandbox.interactors.CancelMovieDownload
 import io.mercury.coroutinesandbox.interactors.DownloadMovie
 import io.mercury.coroutinesandbox.view.component.DownloadIndicatorFactory
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State
@@ -43,6 +45,9 @@ class DownloadListActivity : ComponentActivity() {
 
     @Inject
     lateinit var downloadMovie: DownloadMovie
+
+    @Inject
+    lateinit var cancelMovieDownload: CancelMovieDownload
 
     @Inject
     lateinit var downloadIndicatorFactory: DownloadIndicatorFactory
@@ -88,6 +93,11 @@ class DownloadListActivity : ComponentActivity() {
                                     items(state.inProgressDownloads) { download ->
                                         Box(modifier = Modifier.fillMaxWidth()) {
                                             Text(download.title)
+
+                                            Button(onClick = { cancelMovieDownload(download.id) }, modifier = Modifier.align(
+                                                Alignment.Center)) {
+                                                Text("Cancel")
+                                            }
                                             downloadIndicatorFactory.DownloadIndicator(
                                                 id = download.id,
                                                 Modifier.align(Alignment.TopEnd)
@@ -132,10 +142,8 @@ class DownloadListActivity : ComponentActivity() {
     }
 
     private fun downloadSomething() {
-        MainScope().launch {
-            if (!downloadables.empty()) {
-                downloadMovie(downloadables.pop())
-            }
+        if (!downloadables.empty()) {
+            downloadMovie(downloadables.pop())
         }
     }
 }

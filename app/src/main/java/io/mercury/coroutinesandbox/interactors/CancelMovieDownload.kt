@@ -5,8 +5,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DownloadMovie @Inject constructor(private val downloadManager: MovieDownloadManager) {
+class CancelMovieDownload @Inject constructor(private val movieDownloadManager: MovieDownloadManager) {
     operator fun invoke(id: String) {
-        downloadManager.download(id)
+        movieDownloadManager.cancelDownload(id)
     }
 }
