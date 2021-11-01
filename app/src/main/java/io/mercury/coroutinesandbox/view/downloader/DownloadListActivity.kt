@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,10 +32,8 @@ import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Err
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Loaded
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Loading
 import io.mercury.coroutinesandbox.view.downloader.DownloadListFeature.State.Uninitialized
+import io.mercury.coroutinesandbox.view.downloader.State.DownloadsAvailable
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -50,14 +49,14 @@ class DownloadListActivity : ComponentActivity() {
 
         setContent {
             val composeState by model.feature.state.collectAsState(lifecycleScope.coroutineContext)
-            Root(composeState)
+            Root(composeState, model.downloaderFeature)
         }
 
         model.feature.load()
     }
 
     @Composable
-    fun Root(state: State) {
+    fun Root(state: State, downloaderFeature: CheeseyDownloaderFeature) {
         ThemedMaterial {
             Box(
                 Modifier
@@ -104,27 +103,21 @@ class DownloadListActivity : ComponentActivity() {
                     }
                 }
 
-                Button(
-                    onClick = ::downloadSomething,
-                    modifier = Modifier.align(Alignment.BottomEnd)
-                ) {
-                    Text("Download Something")
-
+                val downloaderState = remember { downloaderFeature.state }.collectAsState()
+                val remainingDownloads = downloaderState.value.let { state ->
+                    if (state is DownloadsAvailable) {
+                        state.downloadables.size
+                    } else {
+                        0
+                    }
                 }
-            }
-        }
-    }
-
-    private val downloadables = Stack<String>().also {
-        it.push("tt0068646")
-        it.push("tt0111161")
-        it.push("tt0108052")
-    }
-
-    private fun downloadSomething() {
-        MainScope().launch {
-            if (!downloadables.empty()) {
-                downloadMovie(downloadables.pop())
+                Button(
+                    onClick = { downloaderFeature.download() },
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    enabled = downloaderState.value is DownloadsAvailable
+                ) {
+                    Text("Download Something ($remainingDownloads)")
+                }
             }
         }
     }
