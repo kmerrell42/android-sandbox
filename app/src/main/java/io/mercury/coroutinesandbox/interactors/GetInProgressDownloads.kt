@@ -14,11 +14,13 @@ class GetInProgressDownloads @Inject constructor(
     private val getMovies: GetMovies
 ) {
     operator fun invoke(): Flow<List<InProgressDownload>> {
-        return downloadManager.downloadJobs
+        return downloadManager.downloadStatuses
             .combine(flow { emit(getMovies()) }) { jobs, movies ->
-                jobs.values.mapNotNull { downloadStatus ->
-                    movies.find { it.id == downloadStatus.id }?.let { movie ->
-                        InProgressDownload(downloadStatus.id, movie.title, downloadStatus.percent)
+                arrayListOf<InProgressDownload>().also { list ->
+                    for ((id, percentage) in jobs) {
+                        movies.find { it.id == id }?.let { movie ->
+                            list.add(InProgressDownload(id, movie.title, percentage))
+                        }
                     }
                 }
             }

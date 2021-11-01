@@ -16,7 +16,7 @@ class GetDownloadedStatuses @Inject constructor(
     private val downloadManager: MovieDownloadManager,
 ) {
     operator fun invoke(): Flow<Map<String, DownloadState>> {
-        return downloadManager.downloadJobs
+        return downloadManager.downloadStatuses
             .combine(flow { emit(downloadedMovieStore.getIds()) }) { inprogress, downloaded ->
                 HashMap<String, DownloadState>()
                     .also { stateMap ->
@@ -25,7 +25,7 @@ class GetDownloadedStatuses @Inject constructor(
                         }
 
                         stateMap.putAll(inprogress.mapValues { entry ->
-                            Downloading(entry.value.percent)
+                            Downloading(entry.value)
                         })
 
                     }

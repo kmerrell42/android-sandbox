@@ -12,10 +12,15 @@ import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStore
 import io.mercury.coroutinesandbox.repos.FavoriteMovieIdsStoreInMemory
 import io.mercury.coroutinesandbox.repos.MoviesStoreImpl
 import io.mercury.domain.repos.MoviesStore
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import retrofit2.Retrofit
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 // This is a property just to shut the compiler warnings up
@@ -26,6 +31,27 @@ private val json = Json {
 @Module
 @InstallIn(SingletonComponent::class)
 object SingletonModule {
+
+    @Qualifier
+    annotation class ApplicationCoroutineScope
+
+    @Provides
+    @Singleton
+    @ApplicationCoroutineScope
+    fun providesApplicationScope(): CoroutineScope {
+        return MainScope()
+    }
+
+    @Qualifier
+    annotation class BackgroundDispatcher
+
+    @Provides
+    @Singleton
+    @BackgroundDispatcher
+    fun providesBackgroundDispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
+    }
+
     @ExperimentalSerializationApi
     @Provides
     @Singleton
