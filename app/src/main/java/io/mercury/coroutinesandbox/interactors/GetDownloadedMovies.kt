@@ -14,7 +14,7 @@ class GetDownloadedMovies @Inject constructor(
     private val getMovies: GetMovies
 ) {
     operator fun invoke(): Flow<List<Movie>> {
-        val allMovies = getMovies.invoke()
+        val allMovies = getMovies()
         return downloadManager.downloadMovies.map { downloadedMovieIds ->
             allMovies.filter { downloadedMovieIds.contains(it.id) }
         }
