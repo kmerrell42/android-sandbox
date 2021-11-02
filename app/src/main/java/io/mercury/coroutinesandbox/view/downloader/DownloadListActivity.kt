@@ -106,7 +106,7 @@ class DownloadListActivity : ComponentActivity() {
                 val downloaderState = remember { downloaderFeature.state }.collectAsState()
                 val remainingDownloads = downloaderState.value.let { state ->
                     if (state is DownloadsAvailable) {
-                        state.downloadables.size
+                        state.downloadables.size - state.downloaded.size
                     } else {
                         0
                     }
