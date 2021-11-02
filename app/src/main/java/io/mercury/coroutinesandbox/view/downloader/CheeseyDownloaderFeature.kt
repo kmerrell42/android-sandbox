@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @ActivityScoped
@@ -18,45 +17,41 @@ class CheeseyDownloaderFeature @Inject constructor(
     val downloadMovie: DownloadMovie
 ) {
     private val statePublisher =
-        MutableStateFlow<State>(DownloadsAvailable.from("tt0068646", "tt0111161", "tt0108052"))
+        MutableStateFlow<State>(DownloadsAvailable(DOWNLOADABLES, arrayListOf()))
     val state get() = statePublisher.asStateFlow()
 
     fun download() {
         state.value.also { currentState ->
             if (currentState is DownloadsAvailable) {
-                val id = currentState.downloadables.pop()
+                val id = currentState.downloadables.first { !currentState.downloaded.contains(it) }
                 coroutineScope.launch(backgroundDispatcher) {
                     downloadMovie(id)
                 }
 
                 coroutineScope.launch {
-                    statePublisher.emit(State.from(currentState))
+                    statePublisher.emit(State.from(currentState, id))
                 }
             }
         }
+    }
 
+    companion object {
+        private val DOWNLOADABLES: List<String> = arrayListOf("tt0068646", "tt0111161", "tt0108052")
     }
 }
 
 sealed class State {
-    class DownloadsAvailable(val downloadables: Stack<String>) : State() {
-        companion object {
-            fun from(vararg ids: String): DownloadsAvailable {
-                return DownloadsAvailable(Stack<String>().also { stack ->
-                    ids.forEach { id ->
-                        stack.push(id)
-                    }
-                })
-            }
-        }
-    }
+    data class DownloadsAvailable(val downloadables: List<String>, val downloaded: List<String>) :
+        State()
 
     object DownloadsUnavailable : State()
 
     companion object {
-        fun from(state: State): State {
-            return if (state is DownloadsAvailable && state.downloadables.isNotEmpty()) {
-                DownloadsAvailable(state.downloadables)
+        fun from(state: State, downloadingId: String): State {
+            return if (state is DownloadsAvailable && state.downloadables.size > state.downloaded.size + 1) {
+                DownloadsAvailable(
+                    state.downloadables,
+                    arrayListOf(downloadingId).also { it.addAll(state.downloaded) })
             } else {
                 DownloadsUnavailable
             }
