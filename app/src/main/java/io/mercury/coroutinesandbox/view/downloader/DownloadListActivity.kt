@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -123,8 +122,8 @@ class DownloadListActivity : ComponentActivity() {
                     }
                 }
 
-                val downloaderState = remember { downloaderFeature.state }.collectAsState()
-                val remainingDownloads = downloaderState.value.let { state ->
+                val downloaderState by remember { downloaderFeature.state }.collectAsState()
+                val remainingDownloads = downloaderState.let { state ->
                     if (state is DownloadsAvailable) {
                         state.downloadables.size - state.downloaded.size
                     } else {
@@ -134,7 +133,7 @@ class DownloadListActivity : ComponentActivity() {
                 Button(
                     onClick = { downloaderFeature.download() },
                     modifier = Modifier.align(Alignment.BottomEnd),
-                    enabled = downloaderState.value is DownloadsAvailable
+                    enabled = downloaderState is DownloadsAvailable
                 ) {
                     Text("Download Something ($remainingDownloads)")
                 }
