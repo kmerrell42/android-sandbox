@@ -23,6 +23,7 @@ import io.mercury.coroutinesandbox.view.downloader.DownloaderActivity
 import io.mercury.coroutinesandbox.view.ext.startActivity
 import io.mercury.coroutinesandbox.view.multirow.MultiRowActivity
 import io.mercury.coroutinesandbox.view.theme.ThemedMaterial
+import io.mercury.coroutinesandbox.view.theming.ThemeActivity
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,6 +69,12 @@ class MainActivity : ComponentActivity() {
                     startActivity(MultiRowActivity::class.java)
                 }) {
                     Text("Multi-row display of movies")
+                }
+
+                Button(onClick = {
+                    startActivity(ThemeActivity::class.java)
+                }) {
+                    Text("Dynamic Theme")
                 }
             }
         }

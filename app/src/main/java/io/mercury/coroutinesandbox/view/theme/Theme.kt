@@ -1,9 +1,13 @@
 package io.mercury.coroutinesandbox.view.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 
 @Composable
 fun ThemedMaterial(content: @Composable () -> Unit) {
